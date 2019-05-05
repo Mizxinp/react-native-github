@@ -8,6 +8,7 @@ import {
 	createAppContainer
 } from 'react-navigation'
 import { BottomTabBar } from 'react-navigation-tabs'
+import {connect} from 'react-redux'
 
 // 图标
 import MaterialIcons from 'react-native-vector-icons/MaterialIcons'
@@ -78,20 +79,26 @@ const TABS = {
 }
 class DynamitTabNavigation extends React.Component{
 	tabNavigation(){
+		if(this.Tabs){
+			return this.Tabs
+		}
 		const { PopularPage,TrendingPage,FavoritePage,Mypage } = TABS
 		const tabs = { PopularPage,TrendingPage,FavoritePage,Mypage }
 		// 这里可以发请求去获取需要展示的tab页，若要动态配置属性可以这样：
 		// PopularPage.navigationOptions.tabBarLabel = '修改'
-		return createAppContainer(
+		return this.Tabs = createAppContainer(
 			createBottomTabNavigator(tabs,{
 				
-				tabBarComponent:tabBarComponent
+				// tabBarComponent:tabBarComponent
+				tabBarComponent:props=>{
+					return <TabBarComponent theme={this.props.theme} {...props}/>
+				}
 			})
 		)
 	}
 	render(){
 		// 用于解决内层组件无法跳转到外层出现的问题
-		NavigationUtil.navigation = this.props.navigation
+		// NavigationUtil.navigation = this.props.navigation
 		const Tab = this.tabNavigation();
 		return(
 			<Tab />
@@ -101,7 +108,7 @@ class DynamitTabNavigation extends React.Component{
 }
 
 // 改变底部导航主题
-class tabBarComponent extends React.Component{
+class TabBarComponent extends React.Component{
 	constructor(props){
 		super(props)
 		this.theme={
@@ -110,17 +117,24 @@ class tabBarComponent extends React.Component{
 		}
 	}
 	render(){
+		/*没有redux之前 
 		const { routes,index } = this.props.navigation.state
 		if(routes[index].params){
 			const {theme} = routes[index].params
 			if(theme && theme.updateTime > this.theme.updateTime){
 				this.theme = theme
 			}
-		}
+		} */
 		return 	<BottomTabBar 
 							{...this.props}
-							activeTintColor={this.theme.tintColor || this.props.activeTintColor}
+							// activeTintColor={this.theme.tintColor || this.props.activeTintColor}
+							activeTintColor={this.props.theme}
 						/>
 	}
 }
-export default DynamitTabNavigation
+
+const mapStateToProps = state => ({
+	theme:state.theme.theme
+})
+
+export default connect(mapStateToProps)(DynamitTabNavigation)
