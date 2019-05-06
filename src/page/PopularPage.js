@@ -1,5 +1,5 @@
 import React from 'react'
-import { View,Text,StyleSheet } from 'react-native'
+import { View,Text,StyleSheet,Button } from 'react-native'
 import { createMaterialTopTabNavigator,createAppContainer } from 'react-navigation'
 import NavigationUtil from '../navigator/NavigationUtil'
 
@@ -43,6 +43,7 @@ class PopularPage extends React.Component{
 	}
 }
 
+
 class PopularTab extends React.Component{
 	render(){
 		const {tabLabel } = this.props;
@@ -54,6 +55,14 @@ class PopularTab extends React.Component{
 						navigation:this.props.navigation
 					},'DetailPage')
 				}}>跳转到详情页</Text>
+				<Button 
+					title='跳转到存储页'
+					onPress={()=>{
+						NavigationUtil.goPage({
+							navigation:this.props.navigation
+						},'DataStorageDemo')
+					}} 
+				/>
 			</View>
 		)
 	}
