@@ -12,15 +12,21 @@ import { connect } from 'react-redux'
 
 import NavigationUtil from '../navigator/NavigationUtil';
 import DynamitTabNavigation from '../navigator/DynamitTabNavigation'
+import backPressComponent from '../common/backPressComponent'
 
 class HomePage extends React.Component{
+	constructor(props){
+		super(props);
+		this.backPress = new backPressComponent({backPress:this.onBackPress()})
+	}
 	componentDidMount(){
-		BackHandler.addEventListener('hardwareBackPress',this.onBackPress)
+		this.backPress.componentDidMount()
 	}
 	componentWillUnmount(){
-		BackHandler.removeEventListener('hardwareBackPress',this.onBackPress)
+		this.backPress.componentWillUnmount()
 	}
 
+	/* 安卓物理返回键处理 */
 	onBackPress = () => {
 		const {dispatch,nav} = this.props;
 		if(nav.routes[1].index === 0){

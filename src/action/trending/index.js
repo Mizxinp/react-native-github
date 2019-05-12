@@ -1,20 +1,18 @@
 import Types from '../types'
-import DataStore from '../../expand/storage/DataStore'
+import DataStore,{FLAG_STORAGE} from '../../expand/storage/DataStore'
 import { handleData } from '../ActionUtil'
-
-// 获取最热数据的action
-export function onLoadRefreshPopular(storeName,url,pageSize){
+// 获取趋势数据的action
+export function onLoadRefreshTrending(storeName,url,pageSize){
 	return dispatch => {
-		dispatch({type:Types.POPULAR_REFRESH,storeName:storeName});
+		dispatch({type:Types.TRENDING_REFRESH,storeName:storeName});
 		let dataStore = new DataStore();
-		dataStore.fetchData(url) //异步action与数据流
+		dataStore.fetchData(url,FLAG_STORAGE.flag_trending) //异步action与数据流
 			.then(res=>{
-				handleData(Types.POPULAR_REFRESH_SUCCESS,dispatch,storeName,res,pageSize)
+				handleData(Types.TRENDING_REFRESH_SUCCESS,dispatch,storeName,res,pageSize)
 			})
 			.catch(error=>{
-				console.log('pupular错误',error);
 				dispatch({
-					type:Types.POPULAR_REFRESH_FAIL,
+					type:Types.TRENDING_REFRESH_FAIL,
 					storeName,
 					error
 				})
@@ -24,7 +22,7 @@ export function onLoadRefreshPopular(storeName,url,pageSize){
 }
 
 // 上拉加载更多
-export function onLoadMorePupular(storeName,pageIndex,pageSize,dataArray=[],callback){
+export function onLoadMoreTrending(storeName,pageIndex,pageSize,dataArray=[],callback){
 	return dispatch => {
 		setTimeout(()=>{//模拟网络请求
 			if((pageIndex-1)*pageSize >= dataArray.length){
@@ -32,7 +30,7 @@ export function onLoadMorePupular(storeName,pageIndex,pageSize,dataArray=[],call
 					callback('no more')
 				}
 				dispatch({
-					type:Types.POPULAR_LOAD_MORE_FAIL,
+					type:Types.TRENDING_LOAD_MORE_FAIL,
 					error:'no more',
 					storeName,
 					pageIndex:--pageIndex,
@@ -41,7 +39,7 @@ export function onLoadMorePupular(storeName,pageIndex,pageSize,dataArray=[],call
 			}else{
 				let max = pageSize * pageIndex > dataArray.length ? dataArray.length : pageSize*pageIndex
 				dispatch({
-					type:Types.POPULAR_LOAD_MORE_SUCCESS,
+					type:Types.TRENDING_LOAD_MORE_SUCCESS,
 					storeName,
 					pageIndex,
 					projectModels:dataArray.slice(0,max)

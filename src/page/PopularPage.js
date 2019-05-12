@@ -6,11 +6,12 @@ import NavigationUtil from '../navigator/NavigationUtil'
 import { connect } from 'react-redux'
 import actions from '../action/index'
 import PopularItem from '../common/PopularItem'
+import NavigationBar from '../common/NavigationBar'
 
 
 const URL = `https://api.github.com/search/repositories?q=`
 const QUERY_STR = '&sort=stars'
-const THEME_COLOR = 'red'
+const THEME_COLOR = '#678'
 const pageSize = 10
 
 class PopularPage extends React.Component{
@@ -38,18 +39,32 @@ class PopularPage extends React.Component{
 				tabBarOptions:{
 					tabStyle:styles.tabStyle,
 					upperCaseLabel:false,
-					scrollEnabled:true,
+					scrollEnabled:true, //安卓下开启滚动，高度有问题
 					style:{
-						backgroundColor:'#678'
+						backgroundColor:'#678',
+						height:30,
 					},
 					indicatorStyle:styles.indicatorStyle,
 					labelStyle:styles.labelStyle
 				}
 			}
 		))
-		return(
-			<TabNavigation />
-		)
+
+		const statusBar = {
+			backgroundColor:THEME_COLOR,
+			barStyle:'light-content',
+		}
+		const navigationBar = <NavigationBar 
+			title={'最热'}
+			statusBar = {statusBar}
+			style={{backgroundColor:THEME_COLOR}}
+		/>
+		return <View style={styles.container}>
+						{navigationBar}
+						<TabNavigation />
+					</View>
+			
+		
 	}
 }
 
@@ -94,21 +109,23 @@ class PopularTab extends React.Component{
 		return store;
 	}
 	getFetchUrl = (key) => {
-		return URL + key + QUERY_STR
+		return URL + key
 	}
 
 	renderItem = (data) => {
-		console.log('热热热',data);
 		
 		const item = data.item;
 		return<PopularItem 
 						item={item}
+						onSelect={()=>{
+							NavigationUtil.goPage({
+								projectModel:item
+							},'DetailPage')
+						}}
 					/>
 	}
 
 	genIndicator() {
-		console.log('h',this._store().hideLoadingMore);
-		
 		return this._store().hideLoadingMore ? null :
 			<View style={styles.indicatorContainer}>
 					<ActivityIndicator
@@ -128,7 +145,7 @@ class PopularTab extends React.Component{
 		// return<Text>jjj</Text>
 		return(
 			<View>
-				<Text>{tabLabel}</Text>
+				{/* <Text>{tabLabel}</Text> */}
 				<FlatList 
 					data={store.projectModels}
 					renderItem={data=>this.renderItem(data)}
@@ -183,8 +200,11 @@ const mapDispatchToProps = dispatch => ({
 const PopularTabPage = connect(mapStateToProps,mapDispatchToProps)(PopularTab) 
 
 const styles = StyleSheet.create({
+	container: {
+		flex: 1,
+	},
 	tabStyle:{
-		minWidth:50
+		// minWidth:50
 	},
 	indicatorStyle: {
 		height: 2,

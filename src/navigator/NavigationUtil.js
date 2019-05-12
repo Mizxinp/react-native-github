@@ -5,8 +5,7 @@ export default class NavigationUtil{
 		navigation.navigate('Main')
 	}
 	// 返回上一页
-	static goBack(paramas){
-		const { navigation } = paramas;
+	static goBack(navigation){
 		navigation.goBack()
 	}
 	// 跳转到之指定页

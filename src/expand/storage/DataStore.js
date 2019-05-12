@@ -1,8 +1,16 @@
 import { AsyncStorage } from 'react-native'
+import Trending from 'GitHubTrending';
+
+export const FLAG_STORAGE = {flag_popular: 'popular', flag_trending: 'trending'};
 
 export default class DataStore{
-	// 获取数据
-	fetchData(url){
+	/**
+	 *获取数据
+	 *@param url
+	 *@param flag 判断是popular模块还是trending模块
+	 */
+	
+	fetchData(url,flag){
 		return new Promise((resolve,reject) => {
 			this.fetchLocalData(url)
 				.then((wrapData) =>{
@@ -11,7 +19,7 @@ export default class DataStore{
 					if(wrapData && DataStore.checkTimestampValid(wrapData.timestamp)){
 						resolve(wrapData)
 					}else{
-						this.fetchNetData(url)
+						this.fetchNetData(url,flag)
 							.then((data)=>{
 								resolve(this._wrapData(data))
 							})
@@ -21,7 +29,7 @@ export default class DataStore{
 					}
 				})
 				.catch((error)=>{
-						this.fetchNetData(url)
+						this.fetchNetData(url,flag)
 						.then((data)=>{
 							resolve(this._wrapData(data))
 						})
@@ -60,23 +68,37 @@ export default class DataStore{
 	}
 
 	// 获取网络数据
-	 fetchNetData(url){
+	 fetchNetData(url,flag){
 		 return new Promise((resolve,reject)=>{
-				fetch(url)
-					.then((response)=>{
-						if(response.ok){
-							return response.json()
-						}else{
-							throw new Error('Network response was not ok')
-						}
+			 	if(flag !== FLAG_STORAGE.flag_trending){
+				 	fetch(url)
+					 .then((response)=>{
+						 if(response.ok){
+							 return response.json()
+						 }else{
+							 throw new Error('Network response was not ok')
+						 }
+					 })
+					 .then((responseData)=>{
+						 this.saveData(url,responseData);
+						 resolve(responseData)
+					 })
+					 .catch((err)=>{
+						 reject(err)
+					 })
+			 	}else{
+					new Trending().fetchTrending(url)
+						.then(items => {
+								if (!items) {
+										throw new Error('responseData is null');
+								}
+								this.saveData(url, items);
+								resolve(items);
+						})
+						.catch(error => {
+								reject(error);
 					})
-					.then((responseData)=>{
-						this.saveData(url,responseData);
-						resolve(responseData)
-					})
-					.catch((err)=>{
-						reject(err)
-					})
+				 }
 		 })
 	 }
 	 _wrapData(data){
