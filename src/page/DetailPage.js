@@ -6,6 +6,7 @@ import NavigationBar from '../common/NavigationBar'
 import ViewUtil from '../util/ViewUtil'
 import NavigationUtil from '../navigator/NavigationUtil'
 import backPressComponent from '../common/backPressComponent'
+import FavoriteDao from '../expand/storage/FavoriteDao'
  
 const TRENDING_URL = 'https://github.com/';
 const THEME_COLOR = '#678'
@@ -13,16 +14,16 @@ const THEME_COLOR = '#678'
 class DetailPage extends React.Component{
 	constructor(props){
 		super(props);
-		// console.log('ha',this.props);
-		
 		this.params = this.props.navigation.state.params;
-		const {projectModel} = this.params;
-		this.url = projectModel.html_url || TRENDING_URL + projectModel.fullName;
-    const title = projectModel.full_name || projectModel.fullName;
+		const {projectModel,flag} = this.params;
+		this.favoriteDao = new FavoriteDao(flag);
+		this.url = projectModel.item.html_url || TRENDING_URL + projectModel.item.fullName;
+    const title = projectModel.item.full_name || projectModel.item.fullName;
 		this.state = {
-			title:title,
+			title:title || [],
 			url:this.url,
-			canGoBack:false
+			canGoBack:false,
+			isFavorite:projectModel.isFavorite
 		}
 		this.backPress = new backPressComponent({backPress:()=>this.onBackPress()})
 	}
@@ -46,13 +47,30 @@ class DetailPage extends React.Component{
 		}
 
 	}
+	onFavoriteButtonClick = () => {
+		const { projectModel,callback } = this.params
+		const isFavorite=projectModel.isFavorite=!projectModel.isFavorite
+		callback(isFavorite)
+		this.setState({
+			isFavorite:isFavorite
+		})
+		let key = projectModel.item.fullName ? projectModel.item.fullName : projectModel.item.id.toString();
+		if (projectModel.isFavorite) {
+				this.favoriteDao.saveFavoriteItem(key, JSON.stringify(projectModel.item));
+		} else {
+				this.favoriteDao.removeFavoriteItem(key);
+		}
+
+	}
 	renderRightButton() {
 		return (
 			<View style={{flexDirection: 'row'}}>
 				<TouchableOpacity
-						onPress={() => {}}>
+						onPress={() => {
+							this.onFavoriteButtonClick()
+						}}>
 						<FontAwesome
-								name={'star-o'}
+								name={this.state.isFavorite?'star':'star-o'}
 								size={20}
 								style={{color: 'white', marginRight: 10}}
 						/>
@@ -73,6 +91,7 @@ class DetailPage extends React.Component{
 		})
 	}
 	render(){
+		
 		const titleLayoutStyle = this.state.title.length > 20 ? {paddingRight: 30} : null;
 		let navigationBar = <NavigationBar
 			leftButton={ViewUtil.getLeftBackButton(() => this.onBack())}
@@ -81,7 +100,6 @@ class DetailPage extends React.Component{
 			style={{backgroundColor:THEME_COLOR}}
 			rightButton={this.renderRightButton()}
 		/>;
-		console.log('url',this.state.url);
 		
 		return(
 			<View style={{flex:1}}>
