@@ -10,6 +10,7 @@ import NavigationBar from '../common/NavigationBar'
 import GlobalStyles from "../res/styles/GlobalStyles";
 import {MORE_MENU} from '../common/MORE_MENU'
 import ViewUtil from '../util/ViewUtil'
+import {FLAG_LANGUAGE}from '../expand/storage/LanguageDao'
 
 const THEME_COLOR = '#678'
 
@@ -28,6 +29,22 @@ class MyPage extends React.Component{
 			case MORE_MENU.About_Author:
 				RouteName = 'AboutMePage';
 				break;
+			case MORE_MENU.Custom_Key:
+			case MORE_MENU.Custom_Language:
+			case MORE_MENU.Remove_Key:
+					RouteName = 'CustomKeyPage';
+					RouteName = 'CustomKeyPage';
+					params.isRemoveKey = menu === MORE_MENU.Remove_Key;
+					params.flag = menu !== MORE_MENU.Custom_Language ? FLAG_LANGUAGE.flag_key : FLAG_LANGUAGE.flag_language;
+					break;
+			case MORE_MENU.Sort_Key:
+					RouteName = 'SortKeyPage';
+					params.flag = FLAG_LANGUAGE.flag_key;
+					break;
+			case MORE_MENU.Sort_Language:
+					RouteName = 'SortKeyPage';
+					params.flag = FLAG_LANGUAGE.flag_language;
+					break;
 		}
 		if(RouteName){
 			NavigationUtil.goPage(params,RouteName)

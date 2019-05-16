@@ -13,6 +13,7 @@ import FavoriteDao from '../expand/storage/FavoriteDao'
 import FavoriteUtil from "../util/FavoriteUtil";
 import { FLAG_STORAGE } from '../expand/storage/DataStore'
 import EventTypes from '../util/EventTypes'
+import {FLAG_LANGUAGE} from "../expand/storage/LanguageDao";
 
 
 const URL = `https://api.github.com/search/repositories?q=`
@@ -24,23 +25,28 @@ const favoriteDao = new FavoriteDao(FLAG_STORAGE.flag_popular);
 class PopularPage extends React.Component{
 	constructor(props){
 		super(props)
-		this.tabNames = ['java','javascript','react','ios','android','react-native']
+		const {onLoadLanguage} = this.props;
+		onLoadLanguage(FLAG_LANGUAGE.flag_key);
 	}
 	changeTab = ()=>{
 		const tabs = {}
-		this.tabNames.forEach((item,index)=>{
-			tabs[`tab${index}`] = {
-				//  这种方法可以传递相应的参数
-				screen:props => <PopularTabPage {...props} tabLabel={item}/>,
-				navigationOptions:{
-					title:item
+		const {keys} = this.props;
+		keys.forEach((item,index)=>{
+			if(item.checked){
+				tabs[`tab${index}`] = {
+					//  这种方法可以传递相应的参数
+					screen:props => <PopularTabPage {...props} tabLabel={item}/>,
+					navigationOptions:{
+						title:item.name
+					}
 				}
 			}
 		})
 		return tabs
 	}
 	render(){
-		const TabNavigation = createAppContainer(createMaterialTopTabNavigator(
+		const {keys} = this.props
+		const TabNavigation = keys.length>0?createAppContainer(createMaterialTopTabNavigator(
 			this.changeTab(),
 			{
 				tabBarOptions:{
@@ -55,7 +61,7 @@ class PopularPage extends React.Component{
 					labelStyle:styles.labelStyle
 				}
 			}
-		))
+		)):null
 
 		const statusBar = {
 			backgroundColor:THEME_COLOR,
@@ -68,13 +74,20 @@ class PopularPage extends React.Component{
 		/>
 		return <View style={styles.container}>
 						{navigationBar}
-						<TabNavigation />
+						{TabNavigation&&<TabNavigation />}
 					</View>
 			
 		
 	}
 }
 
+const mapPopularStateToProps = state => ({
+	keys: state.language.keys,
+});
+const mapPopularDispatchToProps = dispatch => ({
+	onLoadLanguage: (flag) => dispatch(actions.onLoadLanguage(flag))
+});
+export default connect(mapPopularStateToProps, mapPopularDispatchToProps)(PopularPage);
 
 class PopularTab extends React.Component{
 	constructor(props){
@@ -168,7 +181,7 @@ class PopularTab extends React.Component{
 		const {tabLabel,popular } = this.props;
 
 		let store = this._store()
-		console.log('store',store);
+		// console.log('store',store);
 		
 		// return<Text>jjj</Text>
 		return(
@@ -252,5 +265,3 @@ const styles = StyleSheet.create({
 			margin: 10
 	}
 })
-
-export default PopularPage

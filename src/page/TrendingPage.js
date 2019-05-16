@@ -15,6 +15,8 @@ import FavoriteUtil from "../util/FavoriteUtil";
 import { FLAG_STORAGE } from '../expand/storage/DataStore'
 import FavoriteDao from '../expand/storage/FavoriteDao'
 import EventTypes from '../util/EventTypes'
+import {FLAG_LANGUAGE} from "../expand/storage/LanguageDao"
+import ArrayUtil from "../util/ArrayUtil";
 
 const URL = 'https://github.com/trending/';
 const QUERY_STR = '&sort=stars'
@@ -26,19 +28,28 @@ const favoriteDao = new FavoriteDao(FLAG_STORAGE.flag_trending);
 class TrendingPage extends React.Component{
 	constructor(props){
 		super(props)
-		this.tabNames = ['all','javascript','java','kotlin','c','c++']
+		// this.tabNames = ['all','javascript','java','kotlin','c','c++']
+		const { onLoadLanguage } = this.props
+		onLoadLanguage(FLAG_LANGUAGE.flag_language);
 		this.state={
 			timeSpan:TimeSpans[0]
 		}
+		this.preKeys=[]
 	}
 	changeTab = ()=>{
+		console.log('hahah',this.props);
+		
 		const tabs = {}
-		this.tabNames.forEach((item,index)=>{
-			tabs[`tab${index}`] = {
-				//  这种方法可以传递相应的参数
-				screen:props => <TrendingTabPage {...props} timeSpan={this.state.timeSpan} tabLabel={item}/>,
-				navigationOptions:{
-					title:item
+		const {keys} = this.props;
+		this.preKeys = keys;
+		keys.forEach((item,index)=>{
+			if(item.checked){
+				tabs[`tab${index}`] = {
+					//  这种方法可以传递相应的参数
+					screen:props => <TrendingTabPage {...props} timeSpan={this.state.timeSpan} tabLabel={item.name}/>,
+					navigationOptions:{
+						title:item.name
+					}
 				}
 			}
 		})
@@ -79,7 +90,7 @@ class TrendingPage extends React.Component{
 		/>
 	}
 	_tabNav = () => {
-		if(!this.tabNav){
+		if(!this.tabNav || !ArrayUtil.isEqual(this.preKeys, this.props.keys)){
 			this.tabNav = createAppContainer(createMaterialTopTabNavigator(
 				this.changeTab(),
 				{
@@ -100,6 +111,7 @@ class TrendingPage extends React.Component{
 		return this.tabNav
 	}
 	render(){
+		const {keys} = this.props
 		const statusBar = {
 			backgroundColor:THEME_COLOR,
 			barStyle:'light-content',
@@ -109,14 +121,22 @@ class TrendingPage extends React.Component{
 			statusBar = {statusBar}
 			style={{backgroundColor:THEME_COLOR}}
 		/>
-		const TabNavigation = this._tabNav()
+		const TabNavigation = keys.length ? this._tabNav() : null
 		return <View style={styles.container}>
 						{navigationBar}
-						<TabNavigation />
+						{TabNavigation&&<TabNavigation />}
 						{this.renderTrendingDiolog()}
 					</View>
 	}
 }
+
+const mapTrendingStateToProps = state => ({
+	keys: state.language.languages,
+});
+const mapTrendingDispatchToProps = dispatch => ({
+	onLoadLanguage: (flag) => dispatch(actions.onLoadLanguage(flag))
+});
+export default connect(mapTrendingStateToProps, mapTrendingDispatchToProps)(TrendingPage);
 
 
 class TrendingTab extends React.Component{
@@ -302,5 +322,3 @@ const styles = StyleSheet.create({
 			margin: 10
 	}
 })
-
-export default TrendingPage
