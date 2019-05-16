@@ -100,8 +100,6 @@ class TrendingPage extends React.Component{
 		return this.tabNav
 	}
 	render(){
-		
-
 		const statusBar = {
 			backgroundColor:THEME_COLOR,
 			barStyle:'light-content',
@@ -117,8 +115,6 @@ class TrendingPage extends React.Component{
 						<TabNavigation />
 						{this.renderTrendingDiolog()}
 					</View>
-			
-		
 	}
 }
 
