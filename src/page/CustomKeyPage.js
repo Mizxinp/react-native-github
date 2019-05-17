@@ -17,6 +17,7 @@ class CustomKeyPage extends Component{
 	constructor(props) {
 		super(props);
 		this.params = this.props.navigation.state.params;
+		
 		this.backPress = new BackPressComponent({backPress: (e) => this.onBackPress(e)});
 		this.changeValues = [];	//保存选中的状态
 		this.isRemoveKey = !!this.params.isRemoveKey;
@@ -132,11 +133,12 @@ class CustomKeyPage extends Component{
 
 	_checkedImage(checked) {
 		// const {theme} = this.params;
+		const {theme} = this.params
 		return <Ionicons
 			name={checked ? 'ios-checkbox' : 'md-square-outline'}
 			size={20}
 			style={{
-					color: THEME_COLOR,
+					color: theme.themeColor,
 			}}
 		/>
 	}
@@ -152,13 +154,14 @@ class CustomKeyPage extends Component{
 		/>
 	}
 	render(){
+		const {theme} = this.params
 		let title = this.isRemoveKey ? '标签移除' : '自定义标签';
 		title = this.params.flag === FLAG_LANGUAGE.flag_language ? '自定义语言' : title;
 		let rightButtonTitle = this.isRemoveKey ? '移除' : '保存';
 		let navigationBar = <NavigationBar
 				title={title}
 				leftButton={ViewUtil.getLeftBackButton(() => this.onBack())}
-				style={{backgroundColor:THEME_COLOR}}
+				style={theme.styles.navBar}
 				rightButton={ViewUtil.getRightButton(rightButtonTitle, () => this.onSave())}
 		/>;
 		return(

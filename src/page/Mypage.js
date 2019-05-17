@@ -12,11 +12,11 @@ import {MORE_MENU} from '../common/MORE_MENU'
 import ViewUtil from '../util/ViewUtil'
 import {FLAG_LANGUAGE}from '../expand/storage/LanguageDao'
 
-const THEME_COLOR = '#678'
 
 class MyPage extends React.Component{
 	onClick = (menu) => {
-		let RouteName,params = {}
+		const {theme} = this.props
+		let RouteName,params = {theme}
 		switch (menu){
 			case MORE_MENU.Tutorial:
 				RouteName="WebViewPage";
@@ -45,23 +45,29 @@ class MyPage extends React.Component{
 					RouteName = 'SortKeyPage';
 					params.flag = FLAG_LANGUAGE.flag_language;
 					break;
+			case MORE_MENU.Custom_Theme: //自定义主题
+					const {onShowCustomThemeView} = this.props;
+					onShowCustomThemeView(true);
+					break;
 		}
 		if(RouteName){
 			NavigationUtil.goPage(params,RouteName)
 		}
 	}
 	getItem = (menu) => {
-		return ViewUtil.getMenuItem(() => this.onClick(menu), menu, THEME_COLOR);
+		const { theme } = this.props
+		return ViewUtil.getMenuItem(() => this.onClick(menu), menu, theme.themeColor);
 	}
 	render(){
+		const {theme} = this.props
 		const statusBar = {
-			backgroundColor:THEME_COLOR,
+			backgroundColor:theme.themeColor,
 			barStyle:'light-content',
 		}
 		const navigationBar = <NavigationBar 
 			title={'我的'}
 			statusBar = {statusBar}
-			style={{backgroundColor:THEME_COLOR}}
+			style={{backgroundColor:theme.themeColor}}
 			// leftButton={this.getLeftButten()}
 			// rightButton={this.getRightButten()}
 		/>
@@ -79,7 +85,7 @@ class MyPage extends React.Component{
 										size={40}
 										style={{
 												marginRight: 10,
-												color: THEME_COLOR,
+												color: theme.themeColor,
 										}}
 								/>
 								<Text>GitHub Popular</Text>
@@ -90,7 +96,7 @@ class MyPage extends React.Component{
 								style={{
 										marginRight: 10,
 										alignSelf: 'center',
-										color:THEME_COLOR,
+										color:theme.themeColor,
 								}}/>
 					</TouchableOpacity>
 					<View style={GlobalStyles.line}/>
@@ -132,6 +138,16 @@ class MyPage extends React.Component{
 	}
 }
 
+const mapStateToProps = state => ({
+	theme: state.theme.theme,
+});
+
+const mapDispatchToProps = dispatch => ({
+	onShowCustomThemeView: (show) => dispatch(actions.onShowCustomThemeView(show)),
+});
+
+export default connect(mapStateToProps, mapDispatchToProps)(MyPage);
+
 const styles = StyleSheet.create({
 	container: {
 		flex: 1,
@@ -158,5 +174,3 @@ const styles = StyleSheet.create({
 	}
 })
 
-
-export default MyPage

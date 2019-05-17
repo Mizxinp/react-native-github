@@ -26,15 +26,16 @@ class FavoritePage extends React.Component{
 		this.tabNames = ['最热','趋势']
 	}
 	render(){
+		const {theme} = this.props
 		const TabNavigation = createAppContainer(createMaterialTopTabNavigator({
 			'Popular': {
-				screen: props => <FavoriteTabPage {...props} flag={FLAG_STORAGE.flag_popular}/>,//初始化Component时携带默认参数 @https://github.com/react-navigation/react-navigation/issues/2392
+				screen: props => <FavoriteTabPage {...props} flag={FLAG_STORAGE.flag_popular} theme={theme}/>,//初始化Component时携带默认参数 @https://github.com/react-navigation/react-navigation/issues/2392
 				navigationOptions: {
 						title: '最热',
 				},
 			},
 			'Trending': {
-				screen: props => <FavoriteTabPage {...props} flag={FLAG_STORAGE.flag_trending} />,//初始化Component时携带默认参数 @https://github.com/react-navigation/react-navigation/issues/2392
+				screen: props => <FavoriteTabPage {...props} flag={FLAG_STORAGE.flag_trending} theme={theme}/>,//初始化Component时携带默认参数 @https://github.com/react-navigation/react-navigation/issues/2392
 				navigationOptions: {
 						title: '趋势',
 				},
@@ -45,7 +46,7 @@ class FavoritePage extends React.Component{
 				tabStyle:styles.tabStyle,
 				upperCaseLabel:false,
 				style:{
-					backgroundColor:'#678',
+					backgroundColor:theme.themeColor,
 					height:30,
 				},
 				indicatorStyle:styles.indicatorStyle,
@@ -55,13 +56,13 @@ class FavoritePage extends React.Component{
 		))
 
 		const statusBar = {
-			backgroundColor:THEME_COLOR,
+			backgroundColor:theme.themeColor,
 			barStyle:'light-content',
 		}
 		const navigationBar = <NavigationBar 
 			title={'收藏'}
 			statusBar = {statusBar}
-			style={{backgroundColor:THEME_COLOR}}
+			style={theme.styles.navBar}
 		/>
 		return <View style={styles.container}>
 						{navigationBar}
@@ -71,6 +72,11 @@ class FavoritePage extends React.Component{
 		
 	}
 }
+
+const mapFavoriteStateToProps = state => ({
+	theme: state.theme.theme,
+});
+export default connect(mapFavoriteStateToProps)(FavoritePage);
 
 class FavoriteTab extends React.Component{
 	constructor(props){
@@ -118,6 +124,7 @@ class FavoriteTab extends React.Component{
 		}
 	}
 	renderItem = (data) => {
+		const {theme} = this.props
 		const item = data.item;
 		const Item = this.storeName === FLAG_STORAGE.flag_popular ? PopularItem : TrendingItem;
 		return<Item 
@@ -132,6 +139,7 @@ class FavoriteTab extends React.Component{
 						onFavorite={(item,isFavorite)=>{
 							this.onFavorite(item,isFavorite)
 						}}
+						theme={theme}
 					/>
 	}
 
@@ -139,7 +147,7 @@ class FavoriteTab extends React.Component{
 	render(){
 		// console.log('pp',this.props);
 		
-		const {tabLabel,popular } = this.props;
+		const {theme} = this.props;
 
 		let store = this._store()
 		return(
@@ -153,11 +161,11 @@ class FavoriteTab extends React.Component{
 					refreshControl={
 						<RefreshControl 
 							title={'loading'}
-							titleColor={THEME_COLOR}
-							color={THEME_COLOR}
+							titleColor={theme.themeColor}
+							color={theme.themeColor}
 							refreshing={store.isLoading}
 							onRefresh={()=>{this.loadData(true)}}
-							tintColor={THEME_COLOR}
+							tintColor={theme.themeColor}
 						/>
 					}
 					
@@ -202,5 +210,3 @@ const styles = StyleSheet.create({
 			margin: 10
 	}
 })
-
-export default FavoritePage

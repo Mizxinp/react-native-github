@@ -40,13 +40,13 @@ class TrendingPage extends React.Component{
 		console.log('hahah',this.props);
 		
 		const tabs = {}
-		const {keys} = this.props;
+		const {keys,theme} = this.props;
 		this.preKeys = keys;
 		keys.forEach((item,index)=>{
 			if(item.checked){
 				tabs[`tab${index}`] = {
 					//  这种方法可以传递相应的参数
-					screen:props => <TrendingTabPage {...props} timeSpan={this.state.timeSpan} tabLabel={item.name}/>,
+					screen:props => <TrendingTabPage {...props} timeSpan={this.state.timeSpan} tabLabel={item.name} theme={theme}/>,
 					navigationOptions:{
 						title:item.name
 					}
@@ -90,7 +90,8 @@ class TrendingPage extends React.Component{
 		/>
 	}
 	_tabNav = () => {
-		if(!this.tabNav || !ArrayUtil.isEqual(this.preKeys, this.props.keys)){
+		const {theme} = this.props
+		if(theme !== this.theme||!this.tabNav || !ArrayUtil.isEqual(this.preKeys, this.props.keys)){
 			this.tabNav = createAppContainer(createMaterialTopTabNavigator(
 				this.changeTab(),
 				{
@@ -99,27 +100,29 @@ class TrendingPage extends React.Component{
 						upperCaseLabel:false,
 						scrollEnabled:true,
 						style:{
-							backgroundColor:'#678',
+							backgroundColor:theme.themeColor,
 							height:30
 						},
 						indicatorStyle:styles.indicatorStyle,
 						labelStyle:styles.labelStyle
-					}
-				}
+					},
+					lazy:true
+				},
+				
 			))
 		}
 		return this.tabNav
 	}
 	render(){
-		const {keys} = this.props
+		const {keys,theme} = this.props
 		const statusBar = {
-			backgroundColor:THEME_COLOR,
+			backgroundColor:theme.themeColor,
 			barStyle:'light-content',
 		}
 		const navigationBar = <NavigationBar 
 			titleView={this.renderTitleView()}
 			statusBar = {statusBar}
-			style={{backgroundColor:THEME_COLOR}}
+			style={theme.styles.navBar}
 		/>
 		const TabNavigation = keys.length ? this._tabNav() : null
 		return <View style={styles.container}>
@@ -132,6 +135,7 @@ class TrendingPage extends React.Component{
 
 const mapTrendingStateToProps = state => ({
 	keys: state.language.languages,
+	theme: state.theme.theme,
 });
 const mapTrendingDispatchToProps = dispatch => ({
 	onLoadLanguage: (flag) => dispatch(actions.onLoadLanguage(flag))
@@ -208,6 +212,7 @@ class TrendingTab extends React.Component{
 	}
 
 	renderItem = (data) => {
+		const {theme} = this.props
 		const item = data.item;
 		return<TrendingItem 
 						projectModel={item}
@@ -221,6 +226,7 @@ class TrendingTab extends React.Component{
 						onFavorite={(item,isFavorite)=>{
 							FavoriteUtil.onFavorite(favoriteDao,item,isFavorite,FLAG_STORAGE.flag_trending)
 						}}
+						theme={theme}
 					/>
 	}
 
@@ -236,7 +242,7 @@ class TrendingTab extends React.Component{
 	render(){
 		// console.log('pp',this.props);
 		
-		const {tabLabel,popular } = this.props;
+		const {theme} = this.props;
 
 		let store = this._store()
 		console.log('store',store);
@@ -252,11 +258,11 @@ class TrendingTab extends React.Component{
 					refreshControl={
 						<RefreshControl 
 							title={'loading'}
-							titleColor={THEME_COLOR}
-							color={THEME_COLOR}
+							titleColor={theme.themeColor}
+							color={theme.themeColor}
 							refreshing={store.isLoading}
 							onRefresh={()=>{this.loadData()}}
-							tintColor={THEME_COLOR}
+							tintColor={theme.themeColor}
 						/>
 					}
 					ListFooterComponent={()=>this.genIndicator()}
